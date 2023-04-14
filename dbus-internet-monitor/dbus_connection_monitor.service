@@ -1,0 +1,9 @@
+[Unit]
+Description=DBus internet connection monitor
+[Service]
+User=root
+Environment=TERM=xterm
+ExecStart=sh /usr/bin/internet-usage.sh
+Restart=always
+[Install]
+WantedBy=multi-user.target
