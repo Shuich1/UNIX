@@ -5,19 +5,17 @@
 #include <unistd.h>
 
 #define DEVICE_PATH "/dev/chardev"
-#define FILE_PATH "<your_path_to_log_file>"
+#define FILE_PATH "/var/log/character_driver.log"
 
 int main()
 {
     int fd = open(DEVICE_PATH, O_RDONLY);
     if (!fd) {
-        // perror("Failed to open device");
         return EXIT_FAILURE;
     }
 
     FILE *out_file = fopen(FILE_PATH, "w");
     if (!out_file) {
-        // perror("Failed to open output file");
         close(fd);
         return EXIT_FAILURE;
     }
@@ -26,7 +24,7 @@ int main()
         char buf[32];
         ssize_t ret = read(fd, buf, sizeof(buf));
         if (ret < 0) {
-            // perror("Failed to read from device");
+            fprintf(out_file, "Failed to read from device");
             close(fd);
             fclose(out_file);
             return EXIT_FAILURE;
