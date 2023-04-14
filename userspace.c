@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 #define DEVICE_PATH "/dev/chardev"
-#define FILE_PATH "/home/shuichi/SideProjects/UNIX/userspace_output.txt"
+#define FILE_PATH "<your_path_to_log_file>"
 
 int main()
 {
