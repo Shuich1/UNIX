@@ -8,7 +8,6 @@
 #include <linux/module.h>
 #include <linux/poll.h>
 #include <linux/kthread.h>
-#include <dbus/dbus.h>
 
 
 MODULE_LICENSE("GPL");
@@ -132,9 +131,3 @@ static ssize_t device_write(struct file *filp, const char __user *buffer, size_t
 
 module_init(counter_init);
 module_exit(counter_goodbye);
-
-dbus_connection_flush(conn);
-
-
-dbus_message_unref(msg);
-dbus_connection_unref(conn);
