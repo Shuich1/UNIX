@@ -12,3 +12,5 @@ clean:
 stop:
 	systemctl stop chardev
 	sudo rmmod chardev.ko
+restart:
+	systemctl restart chardev
