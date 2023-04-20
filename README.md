@@ -1,4 +1,4 @@
-# Readme for Project
+# Homework on the discipline "Programming for UNIX"
 
 This project contains two folders, chardev and dbus-connection-monitor, which have their own independent implementations.
 
