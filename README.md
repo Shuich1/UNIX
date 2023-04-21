@@ -22,3 +22,20 @@ The Makefile in this folder has the following options:
 - `restart` - Restarts the service.
 
 To run each of the folders, navigate to the directory in the terminal and run the desired option from the Makefile.
+
+## shm
+
+If you want to use shared memory in your project, you can use the provided library, libdebug.so, which contains functions to initialize, write to and close a shared memory block.
+
+To use the library, you can follow these steps:
+
+1. Compile your code and link it with the library by using the -L flag to specify the directory containing the library and the -l flag to specify the name of the library.
+2. Use the functions in your code by including the header file, libdebug.h, in your source files.
+3. When running your application, make sure that the shared library, libdebug.so, is accessible by either installing it in a system directory or by adding its location to the LD_LIBRARY_PATH environment variable.
+
+To compile and link the code with the library, you can use the following command:
+`gcc -o myapp myapp.c -L. -lsharedebug`
+
+Remember to make sure that the library file, libdebug.so, is located in the same directory as your source file, or in a directory specified by the LD_LIBRARY_PATH environment variable.
+
+You can see an example build in Makefile.
