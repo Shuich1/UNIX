@@ -25,7 +25,7 @@ To run each of the folders, navigate to the directory in the terminal and run th
 
 ## shm
 
-If you want to use shared memory in your project, you can use the provided library, libdebug.so, which contains functions to initialize, write to and close a shared memory block.
+This folder consists of shared memory library. If you want, you can use the provided library, libsharedebug.so, which contains functions to initialize, write to and close a shared memory block.
 
 To use the library, you can follow these steps:
 
@@ -40,3 +40,16 @@ To compile and link the code with the library, you can use the following command
 Remember to make sure that the library file, libdebug.so, is located in the same directory as your source file, or in a directory specified by the LD_LIBRARY_PATH environment variable.
 
 You can see an example build in Makefile.
+
+The Makefile in this folder has the following options:
+- `all` - Builds library and userspace example application and running this.
+- `clean` - Removes all built files.
+
+## pci
+
+This folder contains a Linux kernel module that implements a PCI driver for a network card. The driver is responsible for registering with the PCI subsystem, mapping the device's memory space into the kernel's address space, and exposing the device to the rest of the kernel.
+
+The Makefile in this folder has the following options:
+- `all` - Builds the kernel module, inserts it into the system.
+- `clean` - Removes all built files.
+- `stop` - Removes kernel module from system.
