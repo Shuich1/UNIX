@@ -53,3 +53,10 @@ The Makefile in this folder has the following options:
 - `all` - Builds the kernel module, inserts it into the system.
 - `clean` - Removes all built files.
 - `stop` - Removes kernel module from system.
+
+Warning: Before inserting the kernel module, you must down the wired connection and remove the existing kernel module.
+To do this, use:
+
+- `ifconfig <connection> down` to down the connection.
+- `lspci -vv` to find out the name of the kernel module that serves your network card.
+- `rmmod <driver>` to remove this kernel module.
