@@ -34,6 +34,7 @@ To use the library, you can follow these steps:
 3. When running your application, make sure that the shared library, libdebug.so, is accessible by either installing it in a system directory or by adding its location to the LD_LIBRARY_PATH environment variable.
 
 To compile and link the code with the library, you can use the following command:
+
 `gcc -o myapp myapp.c -L. -lsharedebug`
 
 Remember to make sure that the library file, libdebug.so, is located in the same directory as your source file, or in a directory specified by the LD_LIBRARY_PATH environment variable.
