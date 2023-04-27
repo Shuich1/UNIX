@@ -37,26 +37,48 @@ static int network_card_pci_driver_probe(struct pci_dev *pdev, const struct pci_
     u8 __iomem *mmio_base;
     u8 mac_addr[6];
 
-    unsigned int mmio_start = pci_resource_start(pdev, 0);
-    unsigned int mmio_len = pci_resource_len(pdev, 0);
+    //int bars = pci_select_bars(pdev, IORESOURCE_MEM);
 
+    if (pci_resource_flags(pdev, 0x5235E60)&IORESOURCE_MEM){
+        printk(KERN_INFO "Network_card: Correct PCI resource flag.\n");
+    }
+    else {
+        printk(KERN_ALERT "Network_card: Incorrect PCI resource flag.\n");
+        return -ENODEV;
+    }
+
+    unsigned long mmio_start = pci_resource_start(pdev, 0x5235E60);
+    unsigned long mmio_len = pci_resource_len(pdev, 0x5235E60);
+            
     if ((mmio_start == 0) || (mmio_len == 0)) {
-        printk(KERN_ALERT "Network_card: Failed to get pci resources\n");
+        printk(KERN_ALERT "Network_card: Failed to get pci resources: %lx - start %lu - len\n", mmio_start, mmio_len);
+        return -ENOMEM;
+    }
+
+    if (!request_mem_region(mmio_start, mmio_len, "mac_mmio")) {
+        printk(KERN_ALERT "Network_card: Failed to request memory region\n");
         return -ENOMEM;
     }
 
     mmio_base = ioremap(mmio_start, mmio_len);
-
-    if (!mmio_base) {
-        printk(KERN_ALERT "Network_card: Failed to remap memory\n");
+    
+    if(!mmio_base){
+        printk(KERN_ALERT "Network_card: Failed to get pci resources, ioremap failed\n");
         return -EIO;
     }
-    
-    printk(KERN_INFO "Network_card: %d:%d\n", VENDOR_ID, DRIVER_ID);
-    printk(KERN_INFO "%p - %lu\n", mmio_base, (unsigned long)mmio_len);
 
-    // TODO MAC address fetching from pci memory
-    // 7c:10:c9:24:5a:d6
+    // int j;
+    // for(j = 0; j < mmio_len / sizeof(u8); j++){
+    //     printk(KERN_INFO "%02x\n ", mmio_base[j]);
+    // }
+
+    //TODO MAC address fetching from pci device memory...    
+
+    printk(KERN_INFO "Network_card: %04x:%04x\n", VENDOR_ID, DRIVER_ID);
+    printk(KERN_INFO "%p - %lu\n", mmio_base, (unsigned long)mmio_len);
+    
+    iounmap(mmio_base);
+
     return 0;
 }
 
