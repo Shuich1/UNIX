@@ -26,20 +26,20 @@ shm_struct dbginit(char* shm_name, int shm_size) {
 
     shm_fd = shm_open(shm_name, O_CREAT | O_RDWR, 0666);
     if (shm_fd == -1) {
-        shm_struct shm = { NULL, -1, -1 };
+        shm_struct shm = { NULL, -1, -1, NULL };
         return shm;
     }
 
     if (ftruncate(shm_fd, shm_size) == -1) {
         close(shm_fd);
-        shm_struct shm = { NULL, -1, -1 };
+        shm_struct shm = { NULL, -1, -1, NULL };
         return shm;
     }
 
     shm_ptr = mmap(NULL, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
     if (shm_ptr == MAP_FAILED) {
         close(shm_fd);
-        shm_struct shm = { NULL, -1, -1 };
+        shm_struct shm = { NULL, -1, -1, NULL };
         return shm;
     }
 
