@@ -13,7 +13,7 @@
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("chardev");
 MODULE_DESCRIPTION("A character driver counter");
-MODULE_VERSION("0.0.0");
+MODULE_VERSION("1.0.0");
 
 #define DEVICE_NAME "chardev"
 
@@ -70,12 +70,12 @@ static int __init counter_init(void) {
 	return 0;
 }
 
-static void __exit counter_goodbye(void) {
+static void __exit counter_exit(void) {
 	kthread_stop(ts);
 	device_destroy(cls, MKDEV(Major, 0));
 	class_destroy(cls);
 	unregister_chrdev(Major, DEVICE_NAME);
-	printk(KERN_INFO "Counter: Goodbye cruel world.\n");
+	printk(KERN_INFO "Counter: Finished\n");
 }
 
 static int device_open(struct inode *inode, struct file *file) {
@@ -130,4 +130,4 @@ static ssize_t device_write(struct file *filp, const char __user *buffer, size_t
 }
 
 module_init(counter_init);
-module_exit(counter_goodbye);
+module_exit(counter_exit);
