@@ -1,0 +1,8 @@
+Package: libsharedebug
+Architecture: all
+Section: utils
+Priority: optional
+Maintainer: Zhuravkov Vladislav <zhuravkov.mai@gmail.com>
+Version: 1.0
+Description: A shared memory library.
+ A shared memory library, which contains functions to initialize, write to and close a shared memory block.

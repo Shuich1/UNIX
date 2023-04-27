@@ -45,6 +45,10 @@ The Makefile in this folder has the following options:
 - `all` - Builds library and userspace example application and running this.
 - `clean` - Removes all built files.
 
+Or an example of a build using the .deb package.
+
+`dpkg -i libsharedebug.deb`
+
 ## pci
 
 This folder contains a Linux kernel module that implements a PCI driver for a network card. The driver is responsible for registering with the PCI subsystem, mapping the device's memory space into the kernel's address space, and exposing the device to the rest of the kernel.
