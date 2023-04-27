@@ -27,32 +27,24 @@ char *randstring(size_t length) {
 }
 
 int main() {
-    int fd;
-    void *ptr;
-    size_t size = 1024;
-    char *msg = "Hello, world!";
+    char* shm_name = "/sharedebug";
+    int shm_size = 1024;
 
-    fd = dbginit(&ptr, size);
-    if (fd < 0) {
-        fprintf(stderr, "Failed to create shared memory\n");
-        exit(1);
-    }
-    int counter = 0;
-
-    while (1)
-    {
-        if (dbgwrite(ptr, size, msg) < 0) {
-            fprintf(stderr, "Failed to write message to shared memory\n");
-            exit(1);
-        }
-        printf("Wrote message to shared memory: %s\n", (char *)ptr);
-        msg = randstring(10);
-        sleep(5);
+    shm_struct shm = dbginit(shm_name, shm_size);
+    if (shm.ptr == NULL) {
+        printf("Failed to initialize shared memory.\n");
+        exit(EXIT_FAILURE);
     }
 
+    while (1) {
+        char* message = randstring(10);
+        dbgwrite(shm, message);
+        printf("Wrote message: %s\n", message);
 
-    dbgclose(ptr, size, fd);
-    printf("closed shared memory\n");
+        sleep(1);
+    }
+
+    dbgclose(shm);
 
     return 0;
 }

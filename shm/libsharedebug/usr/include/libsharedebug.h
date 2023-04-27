@@ -5,8 +5,15 @@
 
 #define EXPORT __attribute__((visibility("default")))
 
-EXPORT int dbginit(void **ptr, size_t size);
-EXPORT int dbgwrite(void *ptr, size_t size, const char *msg);
-EXPORT void dbgclose(void *ptr, size_t size, int fd);
+typedef struct {
+    void* ptr;
+    int fd;
+    int size;
+    char* name;
+} shm_struct;
+
+EXPORT shm_struct dbginit(char* shm_name, int shm_size);
+EXPORT int dbgwrite(shm_struct shm, char* message);
+EXPORT void dbgclose(shm_struct shm);
 
 #endif

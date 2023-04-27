@@ -5,59 +5,64 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
-#define SHM_NAME "/sharedebug"
 
 #define EXPORT __attribute__((visibility("default")))
 
-EXPORT int dbginit(void **ptr, size_t size);
-EXPORT int dbgwrite(void *ptr, size_t size, const char *msg);
-EXPORT void dbgclose(void *ptr, size_t size, int fd);
-
-int dbginit(void **ptr, size_t size) {
+typedef struct {
+    void* ptr;
     int fd;
-    void *p;
+    int size;
+    char* name;
+} shm_struct;
 
-    fd = shm_open(SHM_NAME, O_CREAT | O_RDWR, 0666);
-    if (fd < 0) {
-        perror("shm_open");
-        return -1;
+
+EXPORT shm_struct dbginit(char* shm_name, int shm_size);
+EXPORT int dbgwrite(shm_struct shm, char* message);
+EXPORT void dbgclose(shm_struct shm);
+
+shm_struct dbginit(char* shm_name, int shm_size) {
+    int shm_fd;
+    void* shm_ptr;
+
+    shm_fd = shm_open(shm_name, O_CREAT | O_RDWR, 0666);
+    if (shm_fd == -1) {
+        shm_struct shm = { NULL, -1, -1 };
+        return shm;
     }
 
-    if (ftruncate(fd, size) < 0) {
-        perror("ftruncate");
-        close(fd);
-        shm_unlink(SHM_NAME);
-        return -1;
+    if (ftruncate(shm_fd, shm_size) == -1) {
+        close(shm_fd);
+        shm_struct shm = { NULL, -1, -1 };
+        return shm;
     }
 
-    p = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if (p == MAP_FAILED) {
-        perror("mmap");
-        close(fd);
-        shm_unlink(SHM_NAME);
-        return -1;
+    shm_ptr = mmap(NULL, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+    if (shm_ptr == MAP_FAILED) {
+        close(shm_fd);
+        shm_struct shm = { NULL, -1, -1 };
+        return shm;
     }
 
-    *ptr = p;
-    return fd;
+    shm_struct shm = { shm_ptr, shm_fd, shm_size };
+    return shm;
 }
 
-int dbgwrite(void *ptr, size_t size, const char *msg) {
+int dbgwrite(shm_struct shm, char* message) {
     size_t len;
 
-    len = strlen(msg);
-    if (len >= size) {
+    len = strlen(message);
+    if (len >= shm.size) {
         fprintf(stderr, "message too long for shared memory\n");
         return -1;
     }
 
-    memcpy(ptr, msg, len);
-    memset(ptr + len, '\0', size - len);
+    memcpy(shm.ptr, message, len);
+    memset(shm.ptr + len, '\0', shm.size - len);
     return 0;
 }
 
-void dbgclose(void *ptr, size_t size, int fd) {
-    munmap(ptr, size);
-    close(fd);
-    shm_unlink("/debug");
+void dbgclose(shm_struct shm) {
+    munmap(shm.ptr, shm.size);
+    close(shm.fd);
+    shm_unlink(shm.name);
 }
