@@ -43,7 +43,7 @@ shm_struct dbginit(char* shm_name, int shm_size) {
         return shm;
     }
 
-    shm_struct shm = { shm_ptr, shm_fd, shm_size };
+    shm_struct shm = { shm_ptr, shm_fd, shm_size, shm_name };
     return shm;
 }
 
