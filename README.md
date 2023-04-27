@@ -43,6 +43,7 @@ You can see an example build in Makefile.
 
 The Makefile in this folder has the following options:
 - `all` - Builds library and userspace example application and running this.
+- `build` - Only builds library.
 - `clean` - Removes all built files.
 
 Or an example of a build using the .deb package.
