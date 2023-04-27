@@ -20,7 +20,7 @@ if __name__ == '__main__':
                 message = shm.read(1024).rstrip(b'\0').decode('utf-8')
                 if message:
                     sock.send(message.encode("utf-8"))
-                time.sleep(1)    
+                time.sleep(0.1)    
             except KeyboardInterrupt:
                 sock.close()
                 shm.close()
