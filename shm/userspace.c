@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "libsharedebug.h"
+#include <libsharedebug.h>
 
 char *randstring(size_t length) {
 
