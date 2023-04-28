@@ -55,10 +55,10 @@ static int network_card_pci_driver_probe(struct pci_dev *pdev, const struct pci_
         return -ENOMEM;
     }
 
-    if (!request_mem_region(mmio_start, mmio_len, "mac_mmio")) {
-        printk(KERN_ALERT "Network_card: Failed to request memory region\n");
-        return -ENOMEM;
-    }
+    // if (!request_mem_region(mmio_start, mmio_len, "mac_mmio")) {
+    //     printk(KERN_ALERT "Network_card: Failed to request memory region\n");
+    //     return -ENOMEM;
+    // }
 
     mmio_base = ioremap(mmio_start, mmio_len);
     
