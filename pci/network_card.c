@@ -4,8 +4,10 @@
 
 #define VENDOR_ID 0x10ec
 #define DRIVER_ID 0x8168
+
 #define DRIVER_NAME "network_card_pci_driver"
 
+#define IOCTL_GET_MAC_ADDRESS _IOR('mac', 1, char *) // 0xed696301
 
 static struct pci_device_id network_card_pci_driver_id_table[] = {
     { PCI_DEVICE(VENDOR_ID, DRIVER_ID) },
@@ -17,6 +19,10 @@ MODULE_DEVICE_TABLE(pci, network_card_pci_driver_id_table);
 static int network_card_pci_driver_probe(struct pci_dev *pdev, const struct pci_device_id *ent);
 static void network_card_pci_driver_remove(struct pci_dev *pdev);
 
+static int network_card_open(struct inode *inode, struct file *file);
+static int network_card_release(struct inode *inode, struct file *file);
+static long network_card_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
+
 static struct pci_driver network_card_pci_driver = {
     .name = DRIVER_NAME,
     .id_table = network_card_pci_driver_id_table,
@@ -24,18 +30,55 @@ static struct pci_driver network_card_pci_driver = {
     .remove = network_card_pci_driver_remove
 };
 
+static struct file_operations network_card_fops = {
+    .open = network_card_open,
+    .release = network_card_release,
+    .unlocked_ioctl = network_card_ioctl,
+};
+
+enum {
+    CDEV_NOT_USED = 0,
+    CDEV_EXCLUSIVE_OPEN = 1,
+};
+
+static atomic_t already_open = ATOMIC_INIT(CDEV_NOT_USED);
+
+static int Major;
+static struct class *cls;
+
+unsigned char mac_addr[6];
 
 static int __init network_card_pci_driver_init(void) {
-    return pci_register_driver(&network_card_pci_driver);
+    int result = pci_register_driver(&network_card_pci_driver);
+    if(result < 0){
+        return result;
+    }
+
+    Major = register_chrdev(0, DRIVER_NAME, &network_card_fops);
+	if (Major < 0) {
+		printk(KERN_ALERT "Network_card: Registering char device failed with %d\n", Major);
+		return Major;
+	}
+	printk(KERN_INFO "Network_card: I was assigned major number %d.", Major);
+
+    cls = class_create(THIS_MODULE, DRIVER_NAME);
+	device_create(cls, NULL, MKDEV(Major, 0), NULL, DRIVER_NAME);
+
+    return result;
 }
 
 static void __exit network_card_pci_driver_exit(void){
+    device_destroy(cls, MKDEV(Major, 0));
+	class_destroy(cls);
+	unregister_chrdev(Major, DRIVER_NAME);
+
+	printk(KERN_INFO "Network_card: Device finished\n");
+
     return pci_unregister_driver(&network_card_pci_driver);
 }
 
 static int network_card_pci_driver_probe(struct pci_dev *pdev, const struct pci_device_id *ent) {
     u8 __iomem *mmio_base;
-    u8 mac_addr[6];
 
     int bar = 2;
 
@@ -83,8 +126,44 @@ static int network_card_pci_driver_probe(struct pci_dev *pdev, const struct pci_
     return 0;
 }
 
+static int network_card_open(struct inode *inode, struct file *file) {
+	if (atomic_cmpxchg(&already_open, CDEV_NOT_USED, CDEV_EXCLUSIVE_OPEN)) {
+        printk(KERN_ALERT "Network_card: Failed to open character device\n");
+		return -EBUSY;
+	}
+
+	try_module_get(THIS_MODULE);
+    printk(KERN_INFO "Network_card: Character device opened\n");
+
+	return 0;
+}
+
+static int network_card_release(struct inode *inode, struct file *file) {
+	atomic_set(&already_open, CDEV_NOT_USED);
+	module_put(THIS_MODULE);
+
+    printk(KERN_INFO "Network_card: Character device closed\n");
+	return 0;
+}
+
+static long network_card_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+{
+    switch (cmd) {
+        case IOCTL_GET_MAC_ADDRESS:
+            if (copy_to_user((unsigned long __user *)arg, mac_addr, 6) != 0) {
+                return -EFAULT;
+            }
+            break;
+        default:
+            return -ENOTTY;
+    }
+
+    return 0;
+}
+
+
 static void network_card_pci_driver_remove(struct pci_dev *pdev) {
-    // TODO
+    // Nothing to do...
 }
 
 MODULE_LICENSE("GPL");
