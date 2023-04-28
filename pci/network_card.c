@@ -62,17 +62,17 @@ static int __init network_card_pci_driver_init(void) {
 	printk(KERN_INFO "Network_card: I was assigned major number %d.", Major);
 
     cls = class_create(THIS_MODULE, DRIVER_NAME);
-	device_create(cls, NULL, MKDEV(Major, 0), NULL, DRIVER_NAME);
+    device_create(cls, NULL, MKDEV(Major, 0), NULL, DRIVER_NAME);
 
     return result;
 }
 
 static void __exit network_card_pci_driver_exit(void){
     device_destroy(cls, MKDEV(Major, 0));
-	class_destroy(cls);
-	unregister_chrdev(Major, DRIVER_NAME);
-
-	printk(KERN_INFO "Network_card: Device finished\n");
+    class_destroy(cls);
+    unregister_chrdev(Major, DRIVER_NAME);
+    
+    printk(KERN_INFO "Network_card: Device finished\n");
 
     return pci_unregister_driver(&network_card_pci_driver);
 }
@@ -132,15 +132,15 @@ static int network_card_open(struct inode *inode, struct file *file) {
 		return -EBUSY;
 	}
 
-	try_module_get(THIS_MODULE);
+    try_module_get(THIS_MODULE);
     printk(KERN_INFO "Network_card: Character device opened\n");
 
 	return 0;
 }
 
 static int network_card_release(struct inode *inode, struct file *file) {
-	atomic_set(&already_open, CDEV_NOT_USED);
-	module_put(THIS_MODULE);
+    atomic_set(&already_open, CDEV_NOT_USED);
+    module_put(THIS_MODULE);
 
     printk(KERN_INFO "Network_card: Character device closed\n");
 	return 0;
