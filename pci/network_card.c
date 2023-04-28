@@ -37,9 +37,9 @@ static int network_card_pci_driver_probe(struct pci_dev *pdev, const struct pci_
     u8 __iomem *mmio_base;
     u8 mac_addr[6];
 
-    //int bars = pci_select_bars(pdev, IORESOURCE_MEM);
+    int bar = 2;
 
-    if (pci_resource_flags(pdev, 0x5235E60)&IORESOURCE_MEM){
+    if (pci_resource_flags(pdev, bar)&IORESOURCE_MEM){
         printk(KERN_INFO "Network_card: Correct PCI resource flag.\n");
     }
     else {
@@ -47,8 +47,8 @@ static int network_card_pci_driver_probe(struct pci_dev *pdev, const struct pci_
         return -ENODEV;
     }
 
-    unsigned long mmio_start = pci_resource_start(pdev, 0x5235E60);
-    unsigned long mmio_len = pci_resource_len(pdev, 0x5235E60);
+    unsigned long mmio_start = pci_resource_start(pdev, bar);
+    unsigned long mmio_len = pci_resource_len(pdev, bar);
             
     if ((mmio_start == 0) || (mmio_len == 0)) {
         printk(KERN_ALERT "Network_card: Failed to get pci resources: %lx - start %lu - len\n", mmio_start, mmio_len);
@@ -66,16 +66,17 @@ static int network_card_pci_driver_probe(struct pci_dev *pdev, const struct pci_
         printk(KERN_ALERT "Network_card: Failed to get pci resources, ioremap failed\n");
         return -EIO;
     }
+    
+    int i;
+    for (i = 0; i < 6; i++) {
+        mac_addr[i] = ioread8(mmio_base + i);
+    }
 
-    // int j;
-    // for(j = 0; j < mmio_len / sizeof(u8); j++){
-    //     printk(KERN_INFO "%02x\n ", mmio_base[j]);
-    // }
+    printk(KERN_INFO "Network_card: MAC address %02x:%02x:%02x:%02x:%02x:%02x\n",
+           mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
 
-    //TODO MAC address fetching from pci device memory...    
-
-    printk(KERN_INFO "Network_card: %04x:%04x\n", VENDOR_ID, DRIVER_ID);
-    printk(KERN_INFO "%p - %lu\n", mmio_base, (unsigned long)mmio_len);
+    printk(KERN_INFO "Network_card: Vendor - %04x, Driver - %04x\n", VENDOR_ID, DRIVER_ID);
+    printk(KERN_INFO "Network_card: Base address - %p, region len - %lu\n", mmio_base, (unsigned long)mmio_len);
     
     iounmap(mmio_base);
 
