@@ -56,8 +56,8 @@ static int __init network_card_pci_driver_init(void) {
 
     Major = register_chrdev(0, DRIVER_NAME, &network_card_fops);
 	if (Major < 0) {
-		printk(KERN_ALERT "Network_card: Registering char device failed with %d\n", Major);
-		return Major;
+	    printk(KERN_ALERT "Network_card: Registering char device failed with %d\n", Major);
+	    return Major;
 	}
 	printk(KERN_INFO "Network_card: I was assigned major number %d.", Major);
 
@@ -129,13 +129,13 @@ static int network_card_pci_driver_probe(struct pci_dev *pdev, const struct pci_
 static int network_card_open(struct inode *inode, struct file *file) {
 	if (atomic_cmpxchg(&already_open, CDEV_NOT_USED, CDEV_EXCLUSIVE_OPEN)) {
         printk(KERN_ALERT "Network_card: Failed to open character device\n");
-		return -EBUSY;
+	    return -EBUSY;
 	}
 
     try_module_get(THIS_MODULE);
     printk(KERN_INFO "Network_card: Character device opened\n");
 
-	return 0;
+    return 0;
 }
 
 static int network_card_release(struct inode *inode, struct file *file) {
@@ -143,7 +143,7 @@ static int network_card_release(struct inode *inode, struct file *file) {
     module_put(THIS_MODULE);
 
     printk(KERN_INFO "Network_card: Character device closed\n");
-	return 0;
+    return 0;
 }
 
 static long network_card_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
